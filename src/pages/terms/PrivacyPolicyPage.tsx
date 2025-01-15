@@ -1,9 +1,9 @@
 function PrivacyPolicyPage() {
     return (
         <div>
-            <h1>Privacy Policy</h1>
+            <h1>개인정보처리방침</h1>
             <p>
-                This is the privacy policy.
+                개인정보처리방침
             </p>
         </div>
     );
