@@ -41,7 +41,7 @@ function ChattingList() {
                                 <MdOutlineMoreVert className="size-5" />
                             </IconButton>
                         </MenuHandler>
-                        <MenuList>
+                        <MenuList className="flex flex-col gap-2">
                             <MenuItem>111</MenuItem>
                             <MenuItem>222</MenuItem>
                             <MenuItem>채널 나가기</MenuItem>
@@ -63,7 +63,7 @@ function ChattingList() {
                 </Button>
                 <Collapse open={groupOpen}>
                     {Array.from({ length: 10 }, (_, i) =>
-                        <ChattingButton key={i} n={i + 1} />)}
+                        <ChattingButton key={i} n={i + 1} name={"그룹"} />)}
                 </Collapse>
             </div>
             <div>
@@ -80,7 +80,7 @@ function ChattingList() {
                 </Button>
                 <Collapse open={personOpen}>
                     {Array.from({ length: 10 }, (_, i) =>
-                        <ChattingButton key={i} n={i + 1} />)}
+                        <ChattingButton key={i} n={i + 1} name={"Tania Andrew"} />)}
                 </Collapse>
             </div>
 
@@ -90,17 +90,18 @@ function ChattingList() {
     );
 }
 
-function ChattingButton({ n }: { n: number }) {
+function ChattingButton({ n, name }: { n: number, name: string }) {
     return (
         <Button key={n}
-            className="flex flex-row items-center justify-start w-full gap-4 pl-4 m-2"
+            className="flex flex-row items-center justify-start w-full gap-4 pl-4"
             variant="text" >
             <Avatar
-                className="w-8 h-8"
+                className="w-6 h-6"
+                variant="rounded"
                 src={`https://docs.material-tailwind.com/img/face-${n}.jpg`} />
             <div className="flex flex-col">
-                <Typography variant="h6" color="blue-gray">
-                    {n} Tania Andrew
+                <Typography className="text-sm" variant="h6" color="blue-gray">
+                    {`${n} ${name}`}
                 </Typography>
             </div>
         </Button>

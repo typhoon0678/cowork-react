@@ -1,10 +1,12 @@
-import { Card, CardHeader, Typography, CardBody, Input, Button } from "@material-tailwind/react";
+import { Typography, Button } from "@material-tailwind/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BasicLayout from "../../layout/BasicLayout";
+import LoginTextField from "../../components/member/LoginTextField";
+import LoginCard from "../../components/member/LoginCard";
 
 function SignupPage() {
-    
+
     const navigate = useNavigate();
 
     const [email, setEmail] = useState("");
@@ -12,11 +14,8 @@ function SignupPage() {
     return (
         <BasicLayout>
             <div className="flex h-[calc(100vh-64px)]">
-                <Card
-                    shadow={false}
-                    className="w-full py-8 m-auto border border-gray-300 md:px-24 md:py-14"
-                >
-                    <CardHeader shadow={false} floated={false} className="text-center">
+                <LoginCard
+                    header={
                         <Typography
                             variant="h1"
                             color="blue-gray"
@@ -24,38 +23,17 @@ function SignupPage() {
                         >
                             회원가입
                         </Typography>
-                    </CardHeader>
-                    <CardBody>
+                    } body={
                         <form
                             action="#"
                             className="flex flex-col gap-4 md:mt-12"
                         >
-                            <div>
-                                <label htmlFor="email">
-                                    <Typography
-                                        variant="small"
-                                        color="blue-gray"
-                                        className="block mb-2 font-medium"
-                                    >
-                                        이메일
-                                    </Typography>
-                                </label>
-                                <Input
-                                    value={email}
-                                    onChange={(event) => setEmail(event.target.value)}
-                                    id="email"
-                                    color="gray"
-                                    size="lg"
-                                    type="email"
-                                    name="email"
-                                    placeholder="name@mail.com"
-                                    className="!w-full placeholder:!opacity-100 focus:!border-t-primary !border-t-blue-gray-200"
-                                    labelProps={{
-                                        className: "hidden",
-                                    }}
-                                    crossOrigin=""
-                                />
-                            </div>
+                            <LoginTextField
+                                name="email"
+                                korName="이메일"
+                                placeholder="name@email.com"
+                                value={email}
+                                setValue={setEmail} />
                             <Button size="lg" color="gray" fullWidth
                                 onClick={() => navigate("/verify")}>
                                 이메일 발송
@@ -74,8 +52,7 @@ function SignupPage() {
                                 </a>
                             </Typography>
                         </form>
-                    </CardBody>
-                </Card>
+                    } />
             </div>
         </BasicLayout>
     );
