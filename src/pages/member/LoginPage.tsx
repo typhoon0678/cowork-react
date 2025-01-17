@@ -4,21 +4,29 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import LoginTextField from "../../components/member/LoginTextField";
 import LoginCard from "../../components/member/LoginCard";
-import { login } from "../../apis/member";
+import { loginApi } from "../../apis/member";
 import LoadingLayout from "../../layout/LoadingLayout";
 import { checkEmail, checkPassword } from "../../utils/regex";
+import { useDispatch } from "react-redux";
+import { login } from "../../slices/loginSlice";
 
 function LoginPage() {
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const [loading, setLoading] = useState(false);
 
     const [loginInfo, setLoginInfo] = useState({ email: "", password: "" });
 
     const handleLogin = () => {
-        login(loginInfo.email, loginInfo.password)
-            .then(() => {
+        loginApi(loginInfo.email, loginInfo.password)
+            .then((res) => {
+                dispatch(login({
+                    email: res.data.email,
+                    roles: res.data.roles,
+                    accessToken: res.headers.authorization
+                }));
                 navigate("/");
             })
             .catch((error) => {
@@ -53,7 +61,7 @@ function LoginPage() {
                             <LoginTextField
                                 name="email"
                                 korName="이메일"
-                                placeholder="name@email.com"
+                                placeholder="example@email.com"
                                 value={loginInfo.email}
                                 setValue={(value) => setLoginInfo({ ...loginInfo, email: value })} />
                             <LoginTextField

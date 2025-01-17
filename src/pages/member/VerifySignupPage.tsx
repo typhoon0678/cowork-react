@@ -34,8 +34,8 @@ function VerifySignupPage() {
                 alert("회원가입이 완료되었습니다.");
                 navigate("/login");
             })
-            .catch(() => {
-                alert("알 수 없는 문제가 발생했습니다. 다시 시도해주세요.");
+            .catch((error) => {
+                alert(error.response.data.message);
                 navigate("/signup");
             })
             .finally(() => {
