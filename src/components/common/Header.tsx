@@ -1,14 +1,29 @@
 import { Avatar, Badge, Button, IconButton, Menu, MenuHandler, MenuItem, MenuList, Typography } from "@material-tailwind/react";
 import { MdNotificationsNone, MdArrowDropDownCircle } from "react-icons/md";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "../../store";
+import { logoutApi } from "../../apis/member";
+import { logout } from "../../slices/loginSlice";
 
 function Header() {
 
     const navigate = useNavigate();
 
+    const dispatch = useDispatch();
+
     const loginState = useSelector((state: RootState) => state.loginSlice);
+
+    const handleLogout = () => {
+        logoutApi(loginState.email)
+            .then(() => {
+                dispatch(logout());
+                navigate("/login");
+            })
+            .catch(() => {
+                alert("문제가 발생했습니다. 다시 시도해주세요.");
+            })
+    }
 
     return (
         <div className="flex items-center justify-between h-16">
@@ -51,7 +66,7 @@ function Header() {
                             </MenuHandler>
                             <MenuList className="flex flex-col gap-2">
                                 <MenuItem onClick={() => navigate("/profile")}>프로필</MenuItem>
-                                <MenuItem onClick={() => navigate("/login")}>로그아웃</MenuItem>
+                                <MenuItem onClick={handleLogout}>로그아웃</MenuItem>
                             </MenuList>
                         </Menu>
                     </div>}

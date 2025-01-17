@@ -27,6 +27,10 @@ export const loginApi = async (email: string, password: string) =>
         password: password
     }, { withCredentials: true });
 
+export const logoutApi = async (email: string) =>
+    await axiosApi.post("/member/logout", {
+        email: email
+    }, { withCredentials: true });
 
 
 export const checkMemberInfo = async () =>

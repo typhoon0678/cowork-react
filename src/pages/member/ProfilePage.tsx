@@ -3,6 +3,7 @@ import BasicLayout from "../../layout/BasicLayout";
 import LoginCard from "../../components/member/LoginCard";
 
 function ProfilePage() {
+    
     return (
         <BasicLayout>
             <div className="flex h-[calc(100vh-64px)]">
