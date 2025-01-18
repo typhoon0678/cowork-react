@@ -1,7 +1,9 @@
 import { Avatar, Card, Typography } from "@material-tailwind/react";
 import { useEffect, useRef } from "react";
+import { formatKST } from "../../utils/time";
+import { ChatMessage } from "../../types/chat";
 
-function ChattingCardList({ scrollTrigger }: { scrollTrigger: boolean }) {
+function ChattingCardList({ messageList, scrollTrigger }: { messageList: ChatMessage[], scrollTrigger: boolean }) {
 
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -22,8 +24,8 @@ function ChattingCardList({ scrollTrigger }: { scrollTrigger: boolean }) {
         <div
             ref={scrollRef}
             className="h-[calc(100vh-212px)] overflow-y-auto">
-            {Array.from({ length: 50 }, (_, i) => (
-                <Card key={i}
+            {messageList.map((message) =>
+                <Card key={message.id}
                     className="flex flex-row items-start justify-start gap-4 p-4 m-4 mr-0 bg-gray-100 border-gray-900 md:mr-16 lg:mr-32">
                     <Avatar
                         className="w-10 h-10"
@@ -33,21 +35,21 @@ function ChattingCardList({ scrollTrigger }: { scrollTrigger: boolean }) {
                             <Typography
                                 className="text-sm font-semibold text-gray-900"
                                 variant="small" color="blue-gray">
-                                Tania Andrew
+                                {message.username}
                             </Typography>
                             <Typography
                                 className="text-xs font-normal text-gray-600"
                                 variant="small" color="blue-gray">
-                                12월 26일 오전 11:46
+                                {formatKST(message.createdAt)}
                             </Typography>
                         </div>
                         <Typography
                             className="font-normal"
                             variant="paragraph" color="blue-gray">
-                            Message<br />test
+                            {message.message}
                         </Typography>
                     </div>
-                </Card>))}
+                </Card>)}
         </div>
     );
 }

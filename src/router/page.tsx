@@ -11,4 +11,4 @@ export const Profile = lazy(() => import('../pages/member/ProfilePage'));
 export const TermsOfService = lazy(() => import('../pages/terms/TermsOfServicePage'));
 export const PrivacyPolicy = lazy(() => import('../pages/terms/PrivacyPolicyPage'));
 export const Landing = lazy(() => import('../pages/LandingPage'));
-export const Chatting = lazy(() => import('../pages/chatting/ChattingPage'));
+export const Chatting = lazy(() => import('../pages/chatting/ChatPage'));
