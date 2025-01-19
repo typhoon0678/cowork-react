@@ -30,10 +30,6 @@ function LandingPage() {
                         onClick={() => navigate(`/chat/${channel.id}`)}>
                         {channel.channelName}
                     </Button>)}
-                <Button
-                    onClick={() => navigate("/testChatting")}>
-                    Test Chatting
-                </Button>
             </div>
         </BasicLayout>
     );

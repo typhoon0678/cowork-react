@@ -1,6 +1,13 @@
 import { Typography, Input } from "@material-tailwind/react";
 
-function LoginTextField({ name, korName, placeholder, value, setValue, handleKeyDown }: { name: string, korName: string, placeholder: string, value: string, setValue: (value: string) => void, handleKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void }) {
+function LoginTextField({ name, korName, placeholder, value, setValue, handleKeyDown }: {
+    name: string,
+    korName: string,
+    placeholder: string,
+    value: string,
+    setValue: (value: string) => void,
+    handleKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void
+}) {
 
     let type = "password";
     if (name.startsWith("email")) {

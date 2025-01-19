@@ -2,9 +2,15 @@ import { Avatar, Button, Collapse, Dialog, DialogBody, DialogHeader, IconButton,
 import { Dispatch, SetStateAction, useState } from "react";
 import { MdOutlineKeyboardArrowDown, MdOutlineMoreVert, MdOutlinePeople, MdOutlinePersonAddAlt } from "react-icons/md";
 import { createChatChannel } from "../../apis/chat";
-import { ChatRoom } from "../../types/chat";
+import { ChatRoomMessage } from "../../types/chat";
 
-function ChatRoomList({ chatRoomList, selectedChatRoom, setSelectedChatRoom }: { chatRoomList: ChatRoom[], selectedChatRoom: ChatRoom, setSelectedChatRoom: Dispatch<SetStateAction<ChatRoom>> }) {
+function ChatRoomList({ channelName, chatRoomList, selectedChatRoomId, setSelectedChatRoomId, setScrollTrigger }: {
+    channelName: string,
+    chatRoomList: ChatRoomMessage[],
+    selectedChatRoomId: string,
+    setSelectedChatRoomId: Dispatch<SetStateAction<string>>,
+    setScrollTrigger: Dispatch<SetStateAction<boolean>>
+}) {
 
     const [roomOpen, setRoomOpen] = useState(true);
 
@@ -17,13 +23,13 @@ function ChatRoomList({ chatRoomList, selectedChatRoom, setSelectedChatRoom }: {
     const togglePeopleListOpen = () => setPeopleListOpen((cur) => !cur);
 
 
-    const [channelName, setChannelName] = useState("");
+    const [ChannelNameInput, setChannelNameInput] = useState("");
 
     const handleCreateChannel = () => {
         createChatChannel(channelName)
             .then(() => {
                 alert("생성되었습니다.");
-                setChannelName("");
+                setChannelNameInput("");
             })
             .catch((error) => {
                 alert(error.response.data.message);
@@ -39,7 +45,7 @@ function ChatRoomList({ chatRoomList, selectedChatRoom, setSelectedChatRoom }: {
                         onClick={toggleChannelListOpen}>
                         <Typography
                             variant="h6">
-                            회사 채널
+                            {channelName}
                         </Typography>
                     </Button>
                 </div>
@@ -75,22 +81,30 @@ function ChatRoomList({ chatRoomList, selectedChatRoom, setSelectedChatRoom }: {
                     <MdOutlineKeyboardArrowDown className={`size-4 transition ${roomOpen ? "rotate-180" : ""}`} />
                 </Button>
                 <Collapse open={roomOpen}>
-                    {chatRoomList.map(chatRoom => <ChatRoomButton key={chatRoom.id} chatRoom={chatRoom} selectedChatRoom={selectedChatRoom} setSelectedChatRoom={setSelectedChatRoom} />)}
+                    {chatRoomList.map(chatRoom => <ChatRoomButton key={chatRoom.chatRoomId} chatRoom={chatRoom} selectedChatRoomId={selectedChatRoomId} setSelectedChatRoomId={setSelectedChatRoomId} setScrollTrigger={setScrollTrigger} />)}
                 </Collapse>
             </div>
 
-            <ChannelListModal channelListOpen={channelListOpen} toggleChannelListOpen={toggleChannelListOpen} channelName={channelName} setChannelName={setChannelName} onClick={handleCreateChannel} />
+            <ChannelListModal channelListOpen={channelListOpen} toggleChannelListOpen={toggleChannelListOpen} channelName={ChannelNameInput} setChannelName={setChannelNameInput} onClick={handleCreateChannel} />
             <PeopleListModal peopleListOpen={peopleListOpen} togglePeopleListOpen={togglePeopleListOpen} />
         </div>
     );
 }
 
-function ChatRoomButton({ chatRoom, selectedChatRoom, setSelectedChatRoom }: { chatRoom: ChatRoom, selectedChatRoom: ChatRoom, setSelectedChatRoom: Dispatch<SetStateAction<ChatRoom>> }) {
+function ChatRoomButton({ chatRoom, selectedChatRoomId, setSelectedChatRoomId, setScrollTrigger }: {
+    chatRoom: ChatRoomMessage,
+    selectedChatRoomId: string,
+    setSelectedChatRoomId: Dispatch<SetStateAction<string>>,
+    setScrollTrigger: Dispatch<SetStateAction<boolean>>
+}) {
     return (
-        <Button key={chatRoom.id}
-            className={`flex flex-row items-center justify-start w-full gap-4 pl-4 ${(chatRoom === selectedChatRoom) && "bg-gray-500"}`}
+        <Button key={chatRoom.chatRoomId}
+            className={`flex flex-row items-center justify-start w-full gap-4 pl-4 ${(chatRoom.chatRoomId === selectedChatRoomId) && "bg-gray-500"}`}
             variant="text"
-            onClick={() => setSelectedChatRoom(chatRoom)}>
+            onClick={() => {
+                setSelectedChatRoomId(chatRoom.chatRoomId);
+                setScrollTrigger((prev) => !prev);
+            }}>
             <Avatar
                 className="w-6 h-6"
                 variant="rounded"
@@ -105,7 +119,13 @@ function ChatRoomButton({ chatRoom, selectedChatRoom, setSelectedChatRoom }: { c
 }
 
 function ChannelListModal({ channelListOpen, toggleChannelListOpen, channelName, setChannelName, onClick }
-    : { channelListOpen: boolean, toggleChannelListOpen: Dispatch<SetStateAction<boolean>>, channelName: string, setChannelName: Dispatch<SetStateAction<string>>, onClick: (event: React.MouseEvent<HTMLButtonElement>) => void }) {
+    : {
+        channelListOpen: boolean,
+        toggleChannelListOpen: Dispatch<SetStateAction<boolean>>,
+        channelName: string, setChannelName:
+        Dispatch<SetStateAction<string>>,
+        onClick: (event: React.MouseEvent<HTMLButtonElement>) => void
+    }) {
 
     const data = [
         {

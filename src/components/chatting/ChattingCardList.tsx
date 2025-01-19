@@ -3,7 +3,10 @@ import { useEffect, useRef } from "react";
 import { formatKST } from "../../utils/time";
 import { ChatMessage } from "../../types/chat";
 
-function ChattingCardList({ messageList, scrollTrigger }: { messageList: ChatMessage[], scrollTrigger: boolean }) {
+function ChattingCardList({ messageList, scrollTrigger }: {
+    messageList: ChatMessage[],
+    scrollTrigger: boolean
+}) {
 
     const scrollRef = useRef<HTMLDivElement>(null);
 

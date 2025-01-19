@@ -8,6 +8,9 @@ export const createChatChannel = async (channelName: string) =>
         channelName: channelName
     });
 
+export const getChatRoomMessageList = async (channelId: string, size: number) =>
+    await axiosApi.get(`/chat/message/channel/${channelId}?size=${size}`)
+
 export const getChatRoomList = async (channelId: string) =>
     await axiosApi.get(`/chat/room/${channelId}`);
 

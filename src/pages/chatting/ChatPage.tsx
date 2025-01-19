@@ -5,9 +5,9 @@ import ChattingCardList from "../../components/chatting/ChattingCardList";
 import { useEffect, useRef, useState } from "react";
 import FeaturePlan from "../../components/common/FeaturePlan";
 import ChatRoomList from "../../components/chatting/ChatRoomList";
-import { ChatMessage, ChatRoom } from "../../types/chat";
+import { ChatMessage, ChatRoomMessage, ChatRoomMessageResponse } from "../../types/chat";
 import { useParams } from "react-router-dom";
-import { getChatRoomList, getMessages } from "../../apis/chat";
+import { getChatRoomMessageList } from "../../apis/chat";
 import { CompatClient, Stomp } from "@stomp/stompjs";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
@@ -19,38 +19,37 @@ function ChatPage() {
     const stompClient = useRef<CompatClient | null>(null);
     const loginState = useSelector((state: RootState) => state.loginSlice);
 
-    const [chatRoomList, setChatRoomList] = useState<ChatRoom[]>([]);
+    const [roomMessageList, setRoomMessageList] = useState<ChatRoomMessage[]>([]);
 
-    const [selectedChatRoom, setSelectedChatRoom] = useState<ChatRoom>({
-        id: "",
-        roomName: ""
+    const [selectedChatRoomId, setSelectedChatRoomId] = useState("");
+    const [selectedChatRoom, setSelectedChatRoom] = useState<ChatRoomMessage>({
+        chatRoomId: "",
+        roomName: "",
+        messages: [],
+        page: 0,
     });
-
-    const [messageList, setMessageList] = useState<ChatMessage[]>([]);
 
     const [message, setMessage] = useState('');
 
     const [scrollTrigger, setScrollTrigger] = useState(false);
 
     const handleSendMessage = () => {
-        if (stompClient.current && message) {
+        if (stompClient.current && message && channelId && selectedChatRoomId) {
             const body: ChatMessage = {
-                id: uuid(), // 임시 UUID
-                chatChannelId: channelId || "",
-                chatRoomId: selectedChatRoom.id,
+                id: uuid(),
+                chatChannelId: channelId,
+                chatRoomId: selectedChatRoomId,
                 email: loginState.email,
                 username: loginState.email,
                 message: message,
                 createdAt: new Date().toISOString(),
             }
-
             stompClient.current.send(`/pub/message`, {}, JSON.stringify(body));
-            setMessageList([...messageList, body]);
         }
 
         setMessage("");
-        setScrollTrigger(!scrollTrigger);
     }
+
 
     const connect = () => {
         const socket = new WebSocket(`ws://${import.meta.env.VITE_DOMAIN}/ws`);
@@ -58,8 +57,15 @@ function ChatPage() {
         stompClient.current.connect({}, () => {
             if (stompClient.current) {
                 stompClient.current.subscribe(`/sub/channel/${channelId}`, (message) => {
-                    const newMessage = JSON.parse(message.body);
-                    setMessageList([...messageList, newMessage]);
+                    const newMessage: ChatMessage = JSON.parse(message.body);
+
+                    setRoomMessageList(prevRoomMessageList =>
+                        prevRoomMessageList.map(prevRoomMessage =>
+                            prevRoomMessage.chatRoomId === newMessage.chatRoomId
+                                ? { ...prevRoomMessage, messages: [...prevRoomMessage.messages, newMessage] }
+                                : prevRoomMessage
+                        )
+                    );
                 });
             }
         });
@@ -72,16 +78,20 @@ function ChatPage() {
     };
 
     const getMessageList = () => {
-        getChatRoomList(channelId || "")
+        getChatRoomMessageList(channelId || "", 10)
             .then((res) => {
-                setChatRoomList(res.data);
+                res.data.map((data: ChatRoomMessageResponse) =>
+                    setRoomMessageList([...roomMessageList, {
+                        chatRoomId: data.chatRoomId,
+                        roomName: data.roomName,
+                        messages: data.messages.content.reverse(),
+                        page: 1,
+                    }]));
             })
             .catch((error) => {
-                alert(error);
                 alert(error.response.data.message);
             });
     }
-
 
     useEffect(() => {
         connect();
@@ -90,21 +100,21 @@ function ChatPage() {
     }, []);
 
     useEffect(() => {
-        if (selectedChatRoom.id) {
-            getMessages(selectedChatRoom.id)
-                .then((res) => {
-                    setMessageList(res.data);
-                })
-                .catch((error) => {
-                    alert(error.response.data.message);
-                });
-        }
-    }, [selectedChatRoom]);
+        setSelectedChatRoom(roomMessageList.find(roomMessage => roomMessage.chatRoomId === selectedChatRoomId) || {
+            chatRoomId: "",
+            roomName: "",
+            messages: [],
+            page: 0,
+        });
+        
+        setScrollTrigger((prev) => !prev);
+    }, [roomMessageList, selectedChatRoomId]);
+
 
     return (
         <ChattingLayout>
             <div className="flex justify-between">
-                <ChatRoomList chatRoomList={chatRoomList} selectedChatRoom={selectedChatRoom} setSelectedChatRoom={setSelectedChatRoom} />
+                <ChatRoomList channelName="채널 이름" chatRoomList={roomMessageList} selectedChatRoomId={selectedChatRoomId} setSelectedChatRoomId={setSelectedChatRoomId} setScrollTrigger={setScrollTrigger} />
                 <Card className="flex flex-col w-full">
                     <div className="flex items-center justify-between mx-4">
                         <div className="flex items-center justify-start py-1">
@@ -117,7 +127,7 @@ function ChatPage() {
                     </div>
                     <hr />
                     <div className="flex flex-col">
-                        <ChattingCardList messageList={messageList} scrollTrigger={scrollTrigger} />
+                        <ChattingCardList messageList={selectedChatRoom.messages} scrollTrigger={scrollTrigger} />
                         <div className="relative">
                             <Textarea
                                 value={message}
