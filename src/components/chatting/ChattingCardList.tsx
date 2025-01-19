@@ -1,6 +1,6 @@
 import { Avatar, Card, Typography } from "@material-tailwind/react";
 import { useEffect, useRef } from "react";
-import { formatKST } from "../../utils/time";
+import { formatIso } from "../../utils/time";
 import { ChatMessage } from "../../types/chat";
 
 function ChattingCardList({ messageList, scrollTrigger }: {
@@ -43,11 +43,11 @@ function ChattingCardList({ messageList, scrollTrigger }: {
                             <Typography
                                 className="text-xs font-normal text-gray-600"
                                 variant="small" color="blue-gray">
-                                {formatKST(message.createdAt)}
+                                {formatIso(message.createdAt)}
                             </Typography>
                         </div>
                         <Typography
-                            className="font-normal"
+                            className="font-normal whitespace-pre-wrap"
                             variant="paragraph" color="blue-gray">
                             {message.message}
                         </Typography>

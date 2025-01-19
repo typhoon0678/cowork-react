@@ -12,12 +12,14 @@ import { CompatClient, Stomp } from "@stomp/stompjs";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
 import uuid from "react-uuid";
+import { utcToKst } from "../../utils/time";
 
 function ChatPage() {
 
     const { channelId } = useParams();
     const stompClient = useRef<CompatClient | null>(null);
     const loginState = useSelector((state: RootState) => state.loginSlice);
+    const isoString = new Date().toISOString();
 
     const [roomMessageList, setRoomMessageList] = useState<ChatRoomMessage[]>([]);
 
@@ -35,6 +37,7 @@ function ChatPage() {
 
     const handleSendMessage = () => {
         if (stompClient.current && message && channelId && selectedChatRoomId) {
+            console.log(new Date().toISOString());
             const body: ChatMessage = {
                 id: uuid(),
                 chatChannelId: channelId,
@@ -50,14 +53,14 @@ function ChatPage() {
         setMessage("");
     }
 
-
     const connect = () => {
         const socket = new WebSocket(`ws://${import.meta.env.VITE_DOMAIN}/ws`);
         stompClient.current = Stomp.over(socket);
         stompClient.current.connect({}, () => {
             if (stompClient.current) {
                 stompClient.current.subscribe(`/sub/channel/${channelId}`, (message) => {
-                    const newMessage: ChatMessage = JSON.parse(message.body);
+                    let newMessage: ChatMessage = JSON.parse(message.body);
+                    newMessage = { ...newMessage, createdAt: utcToKst(newMessage.createdAt) };
 
                     setRoomMessageList(prevRoomMessageList =>
                         prevRoomMessageList.map(prevRoomMessage =>
@@ -78,7 +81,7 @@ function ChatPage() {
     };
 
     const getMessageList = () => {
-        getChatRoomMessageList(channelId || "", 10)
+        getChatRoomMessageList(channelId || "", isoString, 10)
             .then((res) => {
                 res.data.map((data: ChatRoomMessageResponse) =>
                     setRoomMessageList([...roomMessageList, {
@@ -106,7 +109,7 @@ function ChatPage() {
             messages: [],
             page: 0,
         });
-        
+
         setScrollTrigger((prev) => !prev);
     }, [roomMessageList, selectedChatRoomId]);
 
@@ -132,6 +135,13 @@ function ChatPage() {
                             <Textarea
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key !== "Enter" || e.shiftKey) return;
+                                    else {
+                                        e.preventDefault();
+                                        handleSendMessage();
+                                    }
+                                }}
                                 className="z-0 w-full h-full pr-20"
                                 rows={4} />
                             <div className="absolute h-10 right-6 -top-10">
