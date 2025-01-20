@@ -1,7 +1,7 @@
 import { Avatar, Button, Collapse, Dialog, DialogBody, DialogHeader, IconButton, Input, Menu, MenuHandler, MenuItem, MenuList, Tab, TabPanel, Tabs, TabsBody, TabsHeader, Typography } from "@material-tailwind/react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { MdOutlineKeyboardArrowDown, MdOutlineMoreVert, MdOutlinePeople, MdOutlinePersonAddAlt } from "react-icons/md";
-import { createChatChannel, createChatRoom, getChannelMember } from "../../apis/chat";
+import { createChatChannel, createChatRoom, getChannelMember, inviteChannelMember } from "../../apis/chat";
 import { ChatChannel, ChatChannelMember, ChatRoomMessage } from "../../types/chat";
 
 function ChatRoomList({ chatChannel, chatRoomList, setChatRoomList, selectedChatRoomId, setSelectedChatRoomId, setScrollTrigger }: {
@@ -252,8 +252,15 @@ function PeopleListModal({ chatChannel, peopleListOpen, togglePeopleListOpen }
         }
     }, [chatChannel]);
 
-    const onClick = () => {
-        alert("멤버 추가 구현");
+    const handleInviteMember = () => {
+        inviteChannelMember(chatChannel.id, [emailInput])
+            .then((res) => {
+                console.log(res);
+                togglePeopleListOpen(prev => !prev);
+            })
+            .catch((error) => {
+                alert(error.response.data.message);
+            })
     }
 
     const data = [
@@ -294,7 +301,7 @@ function PeopleListModal({ chatChannel, peopleListOpen, togglePeopleListOpen }
                 />
                 <div className="flex items-center justify-end mt-4">
                     <Button variant="gradient"
-                        onClick={onClick}>
+                        onClick={handleInviteMember}>
                         멤버 추가
                     </Button>
                 </div>
@@ -347,7 +354,6 @@ function RoomModal({ chatChannel, roomModalOpen, toggleRoomModalOpen, setChatRoo
             .then((res) => {
                 alert("생성되었습니다.");
                 setRoomNameInput("");
-                console.log(res);
                 setChatRoomList(prevChatRoomList => [
                     ...prevChatRoomList, {
                         chatRoomId: res.data.id,

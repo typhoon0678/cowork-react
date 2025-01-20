@@ -4,10 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getChatChannelList } from "../apis/chat";
 import { ChatChannel } from "../types/chat";
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
 
 function LandingPage() {
 
     const navigate = useNavigate();
+    const loginState = useSelector((state: RootState) => state.loginSlice);
 
     const [channelList, setChannelList] = useState<ChatChannel[]>([]);
 
@@ -23,14 +26,18 @@ function LandingPage() {
 
     return (
         <BasicLayout>
-            <div className="flex flex-col items-center justify-center w-full h-screen gap-4">
-                {channelList.map((channel) =>
-                    <Button
-                        key={channel.id}
-                        onClick={() => navigate(`/chat/${channel.id}`)}>
-                        {channel.channelName}
-                    </Button>)}
-            </div>
+            {(loginState.isLogin)
+                ? <div className="flex flex-col items-center justify-center w-full h-screen gap-4">
+                    {channelList.map((channel) =>
+                        <Button
+                            key={channel.id}
+                            onClick={() => navigate(`/chat/${channel.id}`)}>
+                            {channel.channelName}
+                        </Button>)}
+                </div>
+                : <div className="flex flex-col items-center justify-center w-full h-screen gap-4">
+                    소개 페이지
+                </div>}
         </BasicLayout>
     );
 }
