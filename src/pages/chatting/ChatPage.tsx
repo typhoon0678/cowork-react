@@ -41,13 +41,12 @@ function ChatPage() {
 
     const handleSendMessage = () => {
         if (stompClient.current && message && channelId && selectedChatRoomId) {
-            console.log(new Date().toISOString());
             const body: ChatMessage = {
                 id: uuid(),
                 chatChannelId: channelId,
                 chatRoomId: selectedChatRoomId,
                 email: loginState.email,
-                username: loginState.email,
+                username: loginState.username,
                 message: message,
                 createdAt: new Date().toISOString(),
             }
@@ -97,13 +96,15 @@ function ChatPage() {
     const getMessageList = () => {
         getChatRoomMessageList(channelId || "", isoString, 10)
             .then((res) => {
+                console.log(res.data);
                 setRoomMessageList(prevRoomMessageList => [
                     ...prevRoomMessageList,
-                    ...res.data.map((chatRoom: ChatRoomMessageResponse) => ({
-                        chatRoomId: chatRoom.chatRoomId,
-                        roomName: chatRoom.roomName,
-                        messages: chatRoom.messages.content.reverse(),
-                        page: 1,
+                    ...res.data.map((chatRoomRes: ChatRoomMessageResponse) => ({
+                        chatRoomId: chatRoomRes.chatRoomId,
+                        roomName: chatRoomRes.roomName,
+                        messages: chatRoomRes.messages.content.reverse(),
+                        page: chatRoomRes.messages.number,
+                        isLast: chatRoomRes.messages.last,
                     }))
                 ]);
             })

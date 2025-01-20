@@ -4,6 +4,7 @@ const initialState = {
     isLogin: false,
     accessToken: "",
     email: "",
+    username: "",
     roles: [],
 }
 
@@ -16,6 +17,7 @@ const loginSlice = createSlice({
                 isLogin: !!action.payload.email,
                 accessToken: action.payload.accessToken,
                 email: action.payload.email,
+                username: action.payload.username,
                 roles: action.payload.roles,
             };
         },

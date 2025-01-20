@@ -1,7 +1,7 @@
 import { Avatar, Button, Collapse, Dialog, DialogBody, DialogHeader, IconButton, Input, Menu, MenuHandler, MenuItem, MenuList, Tab, TabPanel, Tabs, TabsBody, TabsHeader, Typography } from "@material-tailwind/react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { MdOutlineKeyboardArrowDown, MdOutlineMoreVert, MdOutlinePeople, MdOutlinePersonAddAlt } from "react-icons/md";
-import { createChatChannel, createChatRoom, getChannelMember, inviteChannelMember } from "../../apis/chat";
+import { createChatRoom, getChannelMember, inviteChannelMember } from "../../apis/chat";
 import { ChatChannel, ChatChannelMember, ChatRoomMessage } from "../../types/chat";
 
 function ChatRoomList({ chatChannel, chatRoomList, setChatRoomList, selectedChatRoomId, setSelectedChatRoomId, setScrollTrigger }: {
@@ -24,20 +24,6 @@ function ChatRoomList({ chatChannel, chatRoomList, setChatRoomList, selectedChat
     const toggleChannelListOpen = () => setChannelListOpen((cur) => !cur);
     const togglePeopleListOpen = () => setPeopleListOpen((cur) => !cur);
     const toggleRoomModalOpen = () => setRoomModalOpen((cur) => !cur);
-
-
-    const [channelNameInput, setChannelNameInput] = useState("");
-
-    const handleCreateChannel = () => {
-        createChatChannel(channelNameInput)
-            .then(() => {
-                alert("생성되었습니다.");
-                setChannelNameInput("");
-            })
-            .catch((error) => {
-                alert(error.response.data.message);
-            })
-    }
 
     return (
         <div className="w-96 h-[calc(100vh-64px)] overflow-y-auto">
@@ -103,10 +89,7 @@ function ChatRoomList({ chatChannel, chatRoomList, setChatRoomList, selectedChat
 
             <ChannelListModal
                 channelListOpen={channelListOpen}
-                toggleChannelListOpen={toggleChannelListOpen}
-                channelName={channelNameInput}
-                setChannelName={setChannelNameInput}
-                onClick={handleCreateChannel} />
+                toggleChannelListOpen={toggleChannelListOpen} />
             <PeopleListModal
                 chatChannel={chatChannel}
                 peopleListOpen={peopleListOpen}
@@ -147,13 +130,10 @@ function ChatRoomButton({ chatRoom, selectedChatRoomId, setSelectedChatRoomId, s
     );
 }
 
-function ChannelListModal({ channelListOpen, toggleChannelListOpen, channelName, setChannelName, onClick }
+function ChannelListModal({ channelListOpen, toggleChannelListOpen }
     : {
         channelListOpen: boolean,
-        toggleChannelListOpen: Dispatch<SetStateAction<boolean>>,
-        channelName: string,
-        setChannelName: Dispatch<SetStateAction<string>>,
-        onClick: (event: React.MouseEvent<HTMLButtonElement>) => void
+        toggleChannelListOpen: Dispatch<SetStateAction<boolean>>
     }) {
 
     const data = [
@@ -164,37 +144,6 @@ function ChannelListModal({ channelListOpen, toggleChannelListOpen, channelName,
             </div>,
             value: "groupList",
             component: <div>test<br />test2</div>,
-        },
-        {
-            label: <div className="flex items-center gap-2">
-                <MdOutlinePersonAddAlt />
-                <Typography>채널 추가</Typography>
-            </div>,
-            value: "groupAdd",
-            component:
-                <div>
-                    <Input
-                        value={channelName}
-                        onChange={(event) => setChannelName(event.target.value)}
-                        id="channelName"
-                        color="gray"
-                        size="lg"
-                        type="text"
-                        name="channelName"
-                        placeholder="채널 이름"
-                        className="!w-full placeholder:!opacity-100 focus:!border-t-primary !border-t-blue-gray-200"
-                        labelProps={{
-                            className: "hidden",
-                        }}
-                        crossOrigin=""
-                    />
-                    <div className="flex items-center justify-end mt-4">
-                        <Button variant="gradient"
-                            onClick={onClick}>
-                            채널 추가
-                        </Button>
-                    </div>
-                </div>,
         },
     ];
 
@@ -255,7 +204,8 @@ function PeopleListModal({ chatChannel, peopleListOpen, togglePeopleListOpen }
     const handleInviteMember = () => {
         inviteChannelMember(chatChannel.id, [emailInput])
             .then((res) => {
-                console.log(res);
+                console.log(res.data);
+                alert("멤버 목록 업데이트");
                 togglePeopleListOpen(prev => !prev);
             })
             .catch((error) => {
