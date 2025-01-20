@@ -51,9 +51,15 @@ function Header() {
                                 </IconButton>
                             </MenuHandler>
                             <MenuList className="flex flex-col gap-2">
-                                <NotificationMenuItem />
-                                <NotificationMenuItem />
-                                <NotificationMenuItem />
+                                <MenuItem key={1}>
+                                    <NotificationMenuItem />
+                                </MenuItem>
+                                <MenuItem key={2}>
+                                    <NotificationMenuItem />
+                                </MenuItem>
+                                <MenuItem key={3}>
+                                    <NotificationMenuItem />
+                                </MenuItem>
                             </MenuList>
                         </Menu>
                         <Menu>
@@ -92,7 +98,7 @@ function Header() {
 
 function NotificationMenuItem() {
     return (
-        <MenuItem className="flex items-center gap-4 py-2 pl-2 pr-8">
+        <div className="flex items-center gap-4 py-2 pl-2 pr-8">
             <Avatar
                 variant="circular"
                 alt="tania andrew"
@@ -106,7 +112,7 @@ function NotificationMenuItem() {
                     13분 전
                 </Typography>
             </div>
-        </MenuItem>
+        </div>
     );
 }
 

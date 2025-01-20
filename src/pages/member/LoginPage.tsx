@@ -22,7 +22,6 @@ function LoginPage() {
     const handleLogin = () => {
         loginApi(loginInfo.email, loginInfo.password)
             .then((res) => {
-                console.log(res);
                 dispatch(login({
                     email: res.data.email,
                     roles: res.data.roles,

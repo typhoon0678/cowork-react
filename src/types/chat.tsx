@@ -23,6 +23,7 @@ export interface ChatRoomMessage {
     roomName: string,
     messages: ChatMessage[],
     page: number,
+    totalPages: number,
 }
 
 export interface ChatRoomMessageResponse {
@@ -33,22 +34,14 @@ export interface ChatRoomMessageResponse {
 
 export interface PageResponse {
     content: ChatMessage[],
-    empty: boolean,
-    first: boolean,
-    last: boolean,
-    number: number,
-    numberOfElements: number,
-    pageable: Pageable,
-    size: number,
-    totalElements: number,
-    totalPages: number
+    page: Pageable
 }
 
 export interface Pageable {
-    offset: number,
-    pageNumber: number,
-    pageSize: number,
-    paged: boolean,
+    number: number,
+    size: number,
+    totalElements: number,
+    totalPages: number,
 }
 
 export interface ChatChannelMember {

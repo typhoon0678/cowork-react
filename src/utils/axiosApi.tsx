@@ -30,7 +30,6 @@ axiosApi.interceptors.response.use(
                 const refreshResponse = await axiosApi.get('/member/refresh', { withCredentials: true });
 
                 if (refreshResponse.data.status === 200) {
-                    console.log(refreshResponse);
                     store.dispatch(login({
                         email: refreshResponse.data.email,
                         username: refreshResponse.data.username,

@@ -33,6 +33,7 @@ function ChatPage() {
         roomName: "",
         messages: [],
         page: 0,
+        totalPages: 0,
     });
 
     const [message, setMessage] = useState('');
@@ -94,17 +95,19 @@ function ChatPage() {
     }
 
     const getMessageList = () => {
+        setRoomMessageList([]);
         getChatRoomMessageList(channelId || "", isoString, 10)
             .then((res) => {
-                console.log(res.data);
+                console.log(res);
+                console.log("======================================================================================")
                 setRoomMessageList(prevRoomMessageList => [
                     ...prevRoomMessageList,
                     ...res.data.map((chatRoomRes: ChatRoomMessageResponse) => ({
                         chatRoomId: chatRoomRes.chatRoomId,
                         roomName: chatRoomRes.roomName,
                         messages: chatRoomRes.messages.content.reverse(),
-                        page: chatRoomRes.messages.number,
-                        isLast: chatRoomRes.messages.last,
+                        page: chatRoomRes.messages.page.number,
+                        totalPages: chatRoomRes.messages.page.totalPages,
                     }))
                 ]);
             })
@@ -121,11 +124,13 @@ function ChatPage() {
     }, []);
 
     useEffect(() => {
+        console.log(roomMessageList);
         setSelectedChatRoom(roomMessageList.find(roomMessage => roomMessage.chatRoomId === selectedChatRoomId) || {
             chatRoomId: "",
             roomName: "",
             messages: [],
             page: 0,
+            totalPages: 0,
         });
 
         setScrollTrigger((prev) => !prev);
@@ -154,7 +159,11 @@ function ChatPage() {
                     </div>
                     <hr />
                     <div className="flex flex-col">
-                        <ChattingCardList messageList={selectedChatRoom.messages} scrollTrigger={scrollTrigger} />
+                        <ChattingCardList
+                            selectedChatRoom={selectedChatRoom}
+                            setRoomMessageList={setRoomMessageList}
+                            isoString={isoString}
+                            scrollTrigger={scrollTrigger} />
                         <div className="relative">
                             <Textarea
                                 value={message}

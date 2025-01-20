@@ -1,10 +1,13 @@
-import { Avatar, Card, Typography } from "@material-tailwind/react";
-import { useEffect, useRef } from "react";
+import { Avatar, Button, Card, Typography } from "@material-tailwind/react";
+import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { formatIso } from "../../utils/time";
-import { ChatMessage } from "../../types/chat";
+import { ChatRoomMessage } from "../../types/chat";
+import { updateChatRoomMessageList } from "../../apis/chat";
 
-function ChattingCardList({ messageList, scrollTrigger }: {
-    messageList: ChatMessage[],
+function ChattingCardList({ selectedChatRoom, setRoomMessageList, isoString, scrollTrigger }: {
+    selectedChatRoom: ChatRoomMessage,
+    setRoomMessageList: Dispatch<SetStateAction<ChatRoomMessage[]>>,
+    isoString: string,
     scrollTrigger: boolean
 }) {
 
@@ -19,6 +22,30 @@ function ChattingCardList({ messageList, scrollTrigger }: {
         }
     };
 
+    const handleUpdateMessageList = () => {
+        updateChatRoomMessageList(selectedChatRoom.chatRoomId, isoString, selectedChatRoom.page + 1, 10)
+            .then((res) => {
+                setRoomMessageList(prevRoomMessageList =>
+                    prevRoomMessageList.map((chatRoomMessage: ChatRoomMessage) =>
+                        chatRoomMessage.chatRoomId === res.data.chatRoomId
+                            ? {
+                                ...chatRoomMessage,
+                                messages: [
+                                    ...res.data.messages.content.reverse(),
+                                    ...chatRoomMessage.messages
+                                ],
+                                page: res.data.messages.page.number,
+                                totalPages: res.data.messages.page.totalPages,
+                            }
+                            : chatRoomMessage
+                    )
+                );
+            })
+            .catch((error) => {
+                alert(error.response.data.message);
+            });
+    }
+
     useEffect(() => {
         scrollToBottom();
     }, [scrollTrigger]);
@@ -27,7 +54,14 @@ function ChattingCardList({ messageList, scrollTrigger }: {
         <div
             ref={scrollRef}
             className="h-[calc(100vh-212px)] overflow-y-auto">
-            {messageList.map((message) =>
+            {(selectedChatRoom.page + 1 < selectedChatRoom.totalPages) &&
+                <Button
+                    variant="text"
+                    className="w-full"
+                    onClick={handleUpdateMessageList}>
+                    채팅 내역 불러오기
+                </Button>}
+            {selectedChatRoom.messages.map((message) =>
                 <Card key={message.id}
                     className="flex flex-row items-start justify-start gap-4 p-4 m-4 mr-0 bg-gray-100 border-gray-900 md:mr-16 lg:mr-32">
                     <Avatar
