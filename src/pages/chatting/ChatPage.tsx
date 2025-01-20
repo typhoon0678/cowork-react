@@ -5,9 +5,9 @@ import ChattingCardList from "../../components/chatting/ChattingCardList";
 import { useEffect, useRef, useState } from "react";
 import FeaturePlan from "../../components/common/FeaturePlan";
 import ChatRoomList from "../../components/chatting/ChatRoomList";
-import { ChatMessage, ChatRoomMessage, ChatRoomMessageResponse } from "../../types/chat";
+import { ChatChannel, ChatMessage, ChatRoomMessage, ChatRoomMessageResponse } from "../../types/chat";
 import { useParams } from "react-router-dom";
-import { getChatRoomMessageList } from "../../apis/chat";
+import { getChatChannelInfo, getChatRoomMessageList } from "../../apis/chat";
 import { CompatClient, Stomp } from "@stomp/stompjs";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
@@ -21,6 +21,10 @@ function ChatPage() {
     const loginState = useSelector((state: RootState) => state.loginSlice);
     const isoString = new Date().toISOString();
 
+    const [channelInfo, setChannelInfo] = useState<ChatChannel>({
+        id: "",
+        channelName: "",
+    });
     const [roomMessageList, setRoomMessageList] = useState<ChatRoomMessage[]>([]);
 
     const [selectedChatRoomId, setSelectedChatRoomId] = useState("");
@@ -80,16 +84,28 @@ function ChatPage() {
         }
     };
 
+    const getChannelInfo = () => {
+        getChatChannelInfo(channelId || "")
+            .then((res) => {
+                setChannelInfo(res.data);
+            })
+            .catch((error) => {
+                alert(error.response.data.message);
+            })
+    }
+
     const getMessageList = () => {
         getChatRoomMessageList(channelId || "", isoString, 10)
             .then((res) => {
-                res.data.map((data: ChatRoomMessageResponse) =>
-                    setRoomMessageList([...roomMessageList, {
-                        chatRoomId: data.chatRoomId,
-                        roomName: data.roomName,
-                        messages: data.messages.content.reverse(),
+                setRoomMessageList(prevRoomMessageList => [
+                    ...prevRoomMessageList,
+                    ...res.data.map((chatRoom: ChatRoomMessageResponse) => ({
+                        chatRoomId: chatRoom.chatRoomId,
+                        roomName: chatRoom.roomName,
+                        messages: chatRoom.messages.content.reverse(),
                         page: 1,
-                    }]));
+                    }))
+                ]);
             })
             .catch((error) => {
                 alert(error.response.data.message);
@@ -98,6 +114,7 @@ function ChatPage() {
 
     useEffect(() => {
         connect();
+        getChannelInfo();
         getMessageList();
         return () => disconnect();
     }, []);
@@ -117,7 +134,13 @@ function ChatPage() {
     return (
         <ChattingLayout>
             <div className="flex justify-between">
-                <ChatRoomList channelName="채널 이름" chatRoomList={roomMessageList} selectedChatRoomId={selectedChatRoomId} setSelectedChatRoomId={setSelectedChatRoomId} setScrollTrigger={setScrollTrigger} />
+                <ChatRoomList
+                    chatChannel={channelInfo}
+                    chatRoomList={roomMessageList}
+                    setChatRoomList={setRoomMessageList}
+                    selectedChatRoomId={selectedChatRoomId}
+                    setSelectedChatRoomId={setSelectedChatRoomId}
+                    setScrollTrigger={setScrollTrigger} />
                 <Card className="flex flex-col w-full">
                     <div className="flex items-center justify-between mx-4">
                         <div className="flex items-center justify-start py-1">

@@ -50,3 +50,9 @@ export interface Pageable {
     pageSize: number,
     paged: boolean,
 }
+
+export interface ChatChannelMember {
+    id: string,
+    email: string,
+    username: string,
+}
