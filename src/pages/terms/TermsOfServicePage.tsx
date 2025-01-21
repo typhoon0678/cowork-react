@@ -1,8 +1,8 @@
 function TermsOfServicePage() {
     return (
         <div>
-        <h1>Terms of Service</h1>
-        <p>These are the terms of service</p>
+            <h1>서비스 약관</h1>
+            <p>서비스 약관</p>
         </div>
     );
 }

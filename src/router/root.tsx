@@ -36,7 +36,7 @@ const root = createBrowserRouter([
         element: <Suspense fallback={Loading}><PrivacyPolicy /></Suspense>
     },
     {
-        path: '/chatting',
+        path: '/chat/:channelId',
         element: <Suspense fallback={Loading}><Chatting /></Suspense>
     },
 ]);

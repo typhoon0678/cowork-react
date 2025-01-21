@@ -1,17 +1,47 @@
-import { Typography, Input, Button, Card, CardBody, CardHeader } from "@material-tailwind/react";
+import { Typography, Button } from "@material-tailwind/react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import BasicLayout from "../../layout/BasicLayout";
 import LoginTextField from "../../components/member/LoginTextField";
 import LoginCard from "../../components/member/LoginCard";
+import { signup } from "../../apis/member";
+import LoadingLayout from "../../layout/LoadingLayout";
+import { checkPassword } from "../../utils/regex";
 
 function VerifySignupPage() {
 
     const navigate = useNavigate();
     const { state } = useLocation();
-    const { otp } = state;
+    const { email, code } = state;
+
+    const [loading, setLoading] = useState(false);
 
     const [passwordInfo, setPasswordInfo] = useState({ password: "", confirmPassword: "" });
+
+    const activeButton = () => {
+        return checkPassword(passwordInfo.password) && passwordInfo.password === passwordInfo.confirmPassword;
+    }
+
+    const handleKeyDownConfirmPassword = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === "Enter" && activeButton()) {
+            handleSignup();
+        }
+    }
+
+    const handleSignup = () => {
+        signup(email, passwordInfo.password, code)
+            .then(() => {
+                alert("회원가입이 완료되었습니다.");
+                navigate("/login");
+            })
+            .catch((error) => {
+                alert(error.response.data.message);
+                navigate("/signup");
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }
 
     return (
         <BasicLayout>
@@ -32,11 +62,11 @@ function VerifySignupPage() {
                         </div>
                     }
                     body={
-                        <form
-                            action="#"
+                        <div
                             className="flex flex-col gap-4 md:mt-12"
                         >
-                            <div className="hidden">{otp}</div>
+                            <div className="hidden">{email}</div>
+                            <div className="hidden">{code}</div>
                             <LoginTextField
                                 name="password"
                                 korName="비밀번호"
@@ -48,30 +78,17 @@ function VerifySignupPage() {
                                 korName="비밀번호 확인"
                                 placeholder="영문, 숫자, 특수기호 중 2개 이상 포함 8자 이상"
                                 value={passwordInfo.confirmPassword}
-                                setValue={(value) => setPasswordInfo({ ...passwordInfo, confirmPassword: value })} />
+                                setValue={(value) => setPasswordInfo({ ...passwordInfo, confirmPassword: value })}
+                                handleKeyDown={handleKeyDownConfirmPassword} />
                             <Button size="lg" color="gray" variant="gradient" fullWidth
-                                onClick={() => {
-                                    alert("회원가입이 완료되었습니다.");
-                                    navigate("/login");
-                                }}>
+                                onClick={handleSignup}
+                                disabled={!activeButton()}>
                                 회원가입
                             </Button>
-                            <Typography
-                                variant="small"
-                                className="text-center mx-auto max-w-[19rem] !font-medium !text-gray-600"
-                            >
-                                Upon signing in, you consent to abide by our{" "}
-                                <a href="/terms-of-service" className="text-gray-900">
-                                    Terms of Service
-                                </a>
-                                {" "}&{" "}
-                                <a href="privacy-policy" className="text-gray-900">
-                                    Privacy Policy.
-                                </a>
-                            </Typography>
-                        </form>
+                        </div>
                     } />
             </div>
+            <LoadingLayout loading={loading} />
         </BasicLayout>
     );
 }

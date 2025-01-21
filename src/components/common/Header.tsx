@@ -1,10 +1,29 @@
 import { Avatar, Badge, Button, IconButton, Menu, MenuHandler, MenuItem, MenuList, Typography } from "@material-tailwind/react";
 import { MdNotificationsNone, MdArrowDropDownCircle } from "react-icons/md";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { RootState } from "../../store";
+import { logoutApi } from "../../apis/member";
+import { logout } from "../../slices/loginSlice";
 
 function Header() {
 
     const navigate = useNavigate();
+
+    const dispatch = useDispatch();
+
+    const loginState = useSelector((state: RootState) => state.loginSlice);
+
+    const handleLogout = () => {
+        logoutApi(loginState.email)
+            .then(() => {
+                dispatch(logout());
+                navigate("/login");
+            })
+            .catch(() => {
+                alert("문제가 발생했습니다. 다시 시도해주세요.");
+            })
+    }
 
     return (
         <div className="flex items-center justify-between h-16">
@@ -18,46 +37,60 @@ function Header() {
                     </Typography>
                 </Button>
             </div>
-            <div className="flex gap-2">
-                <Menu>
-                    <MenuHandler>
-                        <IconButton
+            <div>
+                {loginState.isLogin &&
+                    <div className="flex gap-2">
+                        <Menu>
+                            <MenuHandler>
+                                <IconButton
+                                    variant="text"
+                                    onClick={() => { }}>
+                                    <Badge withBorder >
+                                        <MdNotificationsNone className="size-6" />
+                                    </Badge>
+                                </IconButton>
+                            </MenuHandler>
+                            <MenuList className="flex flex-col gap-2">
+                                <MenuItem key={1}>
+                                    <NotificationMenuItem />
+                                </MenuItem>
+                                <MenuItem key={2}>
+                                    <NotificationMenuItem />
+                                </MenuItem>
+                                <MenuItem key={3}>
+                                    <NotificationMenuItem />
+                                </MenuItem>
+                            </MenuList>
+                        </Menu>
+                        <Menu>
+                            <MenuHandler>
+                                <IconButton
+                                    variant="text"
+                                    onClick={() => { }}>
+                                    <MdArrowDropDownCircle className="size-6" />
+                                </IconButton>
+                            </MenuHandler>
+                            <MenuList className="flex flex-col gap-2">
+                                <MenuItem onClick={() => navigate("/profile")}>프로필</MenuItem>
+                                <MenuItem onClick={handleLogout}>로그아웃</MenuItem>
+                            </MenuList>
+                        </Menu>
+                    </div>}
+                {!loginState.isLogin &&
+                    <div className="flex gap-2">
+                        <Button
+                            variant="gradient"
+                            onClick={() => navigate("/login")}
+                            hidden={loginState.isLogin}>
+                            로그인
+                        </Button>
+                        <Button
                             variant="text"
-                            onClick={() => { }}>
-                            <Badge withBorder >
-                                <MdNotificationsNone className="size-6" />
-                            </Badge>
-                        </IconButton>
-                    </MenuHandler>
-                    <MenuList className="flex flex-col gap-2">
-                        <NotificationMenuItem />
-                        <NotificationMenuItem />
-                        <NotificationMenuItem />
-                    </MenuList>
-                </Menu>
-                <Menu>
-                    <MenuHandler>
-                        <IconButton
-                            variant="text"
-                            onClick={() => { }}>
-                            <MdArrowDropDownCircle className="size-6" />
-                        </IconButton>
-                    </MenuHandler>
-                    <MenuList className="flex flex-col gap-2">
-                        <MenuItem onClick={() => navigate("/profile")}>프로필</MenuItem>
-                        <MenuItem onClick={() => navigate("/login")}>로그아웃</MenuItem>
-                    </MenuList>
-                </Menu>
-                <Button
-                    variant="gradient"
-                    onClick={() => navigate("/login")}>
-                    로그인
-                </Button>
-                <Button
-                    variant="text"
-                    onClick={() => navigate("/signup")}>
-                    회원가입
-                </Button>
+                            onClick={() => navigate("/signup")}
+                            hidden={loginState.isLogin}>
+                            회원가입
+                        </Button>
+                    </div>}
             </div>
         </div >
     );
@@ -65,7 +98,7 @@ function Header() {
 
 function NotificationMenuItem() {
     return (
-        <MenuItem className="flex items-center gap-4 py-2 pl-2 pr-8">
+        <div className="flex items-center gap-4 py-2 pl-2 pr-8">
             <Avatar
                 variant="circular"
                 alt="tania andrew"
@@ -79,7 +112,7 @@ function NotificationMenuItem() {
                     13분 전
                 </Typography>
             </div>
-        </MenuItem>
+        </div>
     );
 }
 

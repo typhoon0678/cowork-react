@@ -4,12 +4,39 @@ import { useNavigate } from "react-router-dom";
 import BasicLayout from "../../layout/BasicLayout";
 import LoginTextField from "../../components/member/LoginTextField";
 import LoginCard from "../../components/member/LoginCard";
+import { sendMail } from "../../apis/member";
+import LoadingLayout from "../../layout/LoadingLayout";
+import { checkEmail } from "../../utils/regex";
 
 function SignupPage() {
 
     const navigate = useNavigate();
 
     const [email, setEmail] = useState("");
+
+    const [loading, setLoading] = useState(false);
+
+    const navigateToVerify = () => {
+        setLoading(true);
+
+        sendMail(email)
+            .then(() => {
+                navigate("/verify", { state: { email: email } });
+            })
+            .catch((error) => {
+                alert(error.response.data.message);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+
+    }
+
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (checkEmail(email) && event.key === "Enter") {
+            navigateToVerify();
+        }
+    }
 
     return (
         <BasicLayout>
@@ -24,36 +51,39 @@ function SignupPage() {
                             회원가입
                         </Typography>
                     } body={
-                        <form
-                            action="#"
+                        <div
                             className="flex flex-col gap-4 md:mt-12"
                         >
                             <LoginTextField
                                 name="email"
                                 korName="이메일"
-                                placeholder="name@email.com"
+                                placeholder="example@email.com"
                                 value={email}
-                                setValue={setEmail} />
+                                setValue={setEmail}
+                                handleKeyDown={handleKeyDown} />
                             <Button size="lg" color="gray" fullWidth
-                                onClick={() => navigate("/verify")}>
+                                onClick={navigateToVerify}
+                                disabled={!checkEmail(email)}>
                                 이메일 발송
                             </Button>
                             <Typography
                                 variant="small"
                                 className="text-center mx-auto max-w-[19rem] !font-medium !text-gray-600"
                             >
-                                Upon signing in, you consent to abide by our{" "}
-                                <a href="#" className="text-gray-900">
-                                    Terms of Service
+                                회원가입 시 {" "}
+                                <a href="/terms-of-service" target="_blank" className="text-gray-900">
+                                    서비스 약관
                                 </a>{" "}
-                                &{" "}
-                                <a href="#" className="text-gray-900">
-                                    Privacy Policy.
-                                </a>
+                                및{" "}
+                                <a href="/privacy-policy" target="_blank" className="text-gray-900">
+                                    개인정보처리방침
+                                </a>{" "}
+                                에 동의하는 것으로 간주됩니다.{" "}
                             </Typography>
-                        </form>
+                        </div>
                     } />
             </div>
+            <LoadingLayout loading={loading} />
         </BasicLayout>
     );
 }

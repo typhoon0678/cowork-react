@@ -1,7 +1,10 @@
 import { Card, CardHeader, CardBody } from "@material-tailwind/react";
 import { ReactNode } from "react";
 
-function LoginCard({ header, body }: { header: ReactNode, body: ReactNode }) {
+function LoginCard({ header, body }: {
+    header: ReactNode,
+    body: ReactNode
+}) {
 
     return (
         <Card
