@@ -309,7 +309,8 @@ function RoomModal({ chatChannel, roomModalOpen, toggleRoomModalOpen, setChatRoo
                         chatRoomId: res.data.id,
                         roomName: res.data.roomName,
                         messages: [],
-                        page: 1,
+                        page: 0,
+                        totalPages: 0,
                     }]);
 
                 toggleRoomModalOpen((prev) => !prev);
