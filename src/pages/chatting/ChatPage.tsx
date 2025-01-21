@@ -20,6 +20,7 @@ function ChatPage() {
     const stompClient = useRef<CompatClient | null>(null);
     const loginState = useSelector((state: RootState) => state.loginSlice);
     const isoString = new Date().toISOString();
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
 
     const [channelInfo, setChannelInfo] = useState<ChatChannel>({
         id: "",
@@ -58,7 +59,7 @@ function ChatPage() {
     }
 
     const connect = () => {
-        const socket = new WebSocket(`ws://${import.meta.env.VITE_DOMAIN}/ws`);
+        const socket = new WebSocket(`${protocol}://${import.meta.env.VITE_DOMAIN}/chat`);
         stompClient.current = Stomp.over(socket);
         stompClient.current.connect({}, () => {
             if (stompClient.current) {
@@ -98,8 +99,6 @@ function ChatPage() {
         setRoomMessageList([]);
         getChatRoomMessageList(channelId || "", isoString, 10)
             .then((res) => {
-                console.log(res);
-                console.log("======================================================================================")
                 setRoomMessageList(prevRoomMessageList => [
                     ...prevRoomMessageList,
                     ...res.data.map((chatRoomRes: ChatRoomMessageResponse) => ({
